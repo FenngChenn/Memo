@@ -1,6 +1,7 @@
 <template>
-  <div class="todo-item" :class="{completed: isCompleted}">
-    <input type="checkbox" @click="checkTodo" />
+  <div class="todo-item" :class="{completed: currentTodo.completed}">
+    <!-- <div :class="['todo-item', currentTodo.completed ? 'completed' : '']"> -->
+    <input type="checkbox" v-model="currentTodo.completed" />
     <label>{{currentTodo.content}}</label>
     <button @click="deleteTodo"></button>
   </div>
@@ -14,18 +15,9 @@
         type: Object,
       },
     },
-    data() {
-      return {
-        isCompleted: false,
-      }
-    },
     methods: {
-      checkTodo() {
-        this.isCompleted = !this.isCompleted
-      },
       deleteTodo() {
-        let index = this.currentTodo.id
-        this.$emit('deleteTodo', index)
+        this.$emit('deleteTodo', this.currentTodo.id)
       },
     },
   }

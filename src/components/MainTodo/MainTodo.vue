@@ -9,16 +9,22 @@
       @keyup.enter="addTodo"
     />
     <todo-item
-      v-for="(item, index) in todoData"
+      v-for="(item, index) in filterData"
       :key="index"
       :current-todo="item"
       @deleteTodo="deleteCurrentTodo"
     ></todo-item>
+    <todo-info
+      :total-todo="unfinished"
+      @toggleState="toggleState"
+      @clearCompleted="clearCompleted"
+    ></todo-info>
   </div>
 </template>
 
 <script>
   import TodoItem from './sonComps/TodoItem.vue'
+  import TodoInfo from './sonComps/TodoInfo.vue'
 
   let id = 0
 
@@ -26,12 +32,40 @@
     name: 'MainTodo',
     components: {
       TodoItem,
+      TodoInfo,
     },
     data() {
       return {
         todoData: [],
         content: '',
+        unfinished: 0,
+        checkedState: 'all',
       }
+    },
+    watch: {
+      todoData: {
+        deep: true,
+        handler() {
+          this.unfinished = this.todoData.filter(
+            (item) => item.completed === false
+          ).length
+        },
+      },
+    },
+    computed: {
+      filterData() {
+        switch (this.checkedState) {
+          case 'all':
+            return this.todoData
+            break
+          case 'active':
+            return this.todoData.filter((item) => item.completed === false)
+            break
+          case 'completed':
+            return this.todoData.filter((item) => item.completed === true)
+            break
+        }
+      },
     },
     methods: {
       addTodo() {
@@ -46,13 +80,17 @@
         this.content = ''
       },
       deleteCurrentTodo(index) {
-        // console.log(this.todoData.length - index - 1)
-        let loc = this.todoData.length - index - 1
-        this.todoData.map((item) => {
-          if (item.id === index) {
-            this.todoData.splice(loc, 1)
-          }
+        // 找到当前删除的item在数组中的下标
+        let deleteIndex = this.todoData.findIndex((item) => {
+          return item.id === index
         })
+        this.todoData.splice(deleteIndex, 1)
+      },
+      toggleState(state) {
+        this.checkedState = state
+      },
+      clearCompleted() {
+        this.todoData = this.todoData.filter((item) => item.completed == false)
       },
     },
   }
